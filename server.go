@@ -121,7 +121,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	log.SetFlags(0)
-	http.Handle("/", http.FileServer(http.Dir("./src/")))
+	http.Handle("/", http.FileServer(http.Dir("./app/")))
 	http.HandleFunc("/ws", serveWs)
 	log.Fatal(http.ListenAndServeTLS(":8080", "server.crt", "server.key", nil))
 }
