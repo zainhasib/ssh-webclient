@@ -8,9 +8,6 @@ import (
 )
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-    	return true
-    },
 }
 
 func reader(ws *websocket.Conn, client *Client) {
@@ -85,21 +82,7 @@ func ReadPasswordTillNextLine(ws *websocket.Conn) (string) {
 	return str
 }
 
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-}
-
-func serveWs(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
-	ws, err := upgrader.Upgrade(w, r, nil)
-
-	if err != nil {
-		if _, ok := err.(websocket.HandshakeError); !ok {
-			log.Println(err)
-		}
-		return
-	}
-
+func connectSsh(ws *websocket.Conn) {
 	ws.WriteMessage(websocket.TextMessage, []byte("> Enter username : "))
 	username := ReadUsernameTillNextLine(ws)
 	ws.WriteMessage(websocket.TextMessage, []byte("> Enter password : "))
@@ -111,12 +94,26 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err.Error())
 			ws.WriteMessage(websocket.TextMessage, []byte(err.Error()))
-			ws.Close()
+			ws.WriteMessage(websocket.TextMessage, []byte("\r\n\n"))
+			connectSsh(ws)
 			return
 		}
 		go reader(ws, client)
 		writer(ws, client)
 	})
+}
+
+func serveWs(w http.ResponseWriter, r *http.Request) {
+	ws, err := upgrader.Upgrade(w, r, nil)
+
+	if err != nil {
+		if _, ok := err.(websocket.HandshakeError); !ok {
+			log.Println(err)
+		}
+		return
+	}
+
+	connectSsh(ws)
 }
 
 func main() {

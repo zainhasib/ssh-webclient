@@ -123,7 +123,7 @@ func (client *Client) Connect(addr, user, password string, handler func(client *
 	if err != nil {
 		log.Printf("Connect SSH exception(%s)", err.Error())
 		handler(client, err)
-		client.Disconnect()
+		//client.Disconnect()
 		return
 	}
 	defer conn.Close()
