@@ -17,12 +17,12 @@ func reader(ws *websocket.Conn, client *Client) {
         n, err := client.Out.Read(buf)
         if err != nil {
             log.Print(err)
-        	return
+	return
         }
 		err = ws.WriteMessage(websocket.TextMessage, buf[:n])
         if err != nil {
-        	log.Print(err)
-        	return
+			log.Print(err)
+		 	return
         }
 	}
 }
@@ -55,6 +55,11 @@ func ReadUsernameTillNextLine(ws *websocket.Conn) (string) {
 			log.Printf("end reached")
 			break
 		}
+		if []rune(string(message))[0] == 127 && len(str) > 0 {
+			ws.WriteMessage(mt, []byte("\b"))
+			str = str[:len(str)-1]
+			log.Printf("end reached %s", str)
+		}
 		fmt.Println([]rune(string(message))[0])
 		str += string(message)
 		log.Println("recv: " + string(message[:]))
@@ -83,8 +88,11 @@ func ReadPasswordTillNextLine(ws *websocket.Conn) (string) {
 }
 
 func connectSsh(ws *websocket.Conn) {
-	ws.WriteMessage(websocket.TextMessage, []byte("> Enter username : "))
-	username := ReadUsernameTillNextLine(ws)
+	var username = ""
+	for username == "" {
+		ws.WriteMessage(websocket.TextMessage, []byte("> Enter username : "))
+		username = ReadUsernameTillNextLine(ws)
+	}
 	ws.WriteMessage(websocket.TextMessage, []byte("> Enter password : "))
 	password := ReadPasswordTillNextLine(ws)
 	client := NewClient()
@@ -120,5 +128,5 @@ func main() {
 	log.SetFlags(0)
 	http.Handle("/", http.FileServer(http.Dir("./app/")))
 	http.HandleFunc("/ws", serveWs)
-	log.Fatal(http.ListenAndServeTLS(":8080", "server.crt", "server.key", nil))
+	log.Fatal(http.ListenAndServeTLS(":7443", "server.crt", "server.key", nil))
 }

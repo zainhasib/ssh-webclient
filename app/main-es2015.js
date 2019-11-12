@@ -207,7 +207,7 @@ let TerminalComponent = class TerminalComponent {
             fontFamily: 'Menlo, Monaco, Consolas, monospace',
         });
         this.terminal.open(this.term.nativeElement);
-        const socketURL = "wss://" + window.location.hostname + ":8080/ws";
+        const socketURL = "wss://" + window.location.hostname + ":7443/ws";
         const socket = new WebSocket(socketURL);
         socket.onopen = () => {
             this.terminal.attach(socket);

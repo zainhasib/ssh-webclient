@@ -219,7 +219,7 @@ var TerminalComponent = /** @class */ (function () {
             fontFamily: 'Menlo, Monaco, Consolas, monospace',
         });
         this.terminal.open(this.term.nativeElement);
-        var socketURL = "wss://" + window.location.hostname + ":8080/ws";
+        var socketURL = "wss://" + window.location.hostname + ":7443/ws";
         var socket = new WebSocket(socketURL);
         socket.onopen = function () {
             _this.terminal.attach(socket);
